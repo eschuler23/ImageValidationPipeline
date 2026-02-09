@@ -4,7 +4,9 @@
   "description": "Card Builder",
   "private": true,
   "scripts": {
-    "build": "rm -rf dist && node build.config.js && sass --style=compressed --no-source-map src/styles/default.scss dist/card-default.css"
+    "build": "rm -rf dist && node build.config.js && sass --style=compressed --no-source-map src/styles/default.scss dist/card-default.css",
+    "build:website-like": "python3 export_datacard_website_like.py --input AURA_Dataset_v0.2_DataCard.md --output AURA_Dataset_v0.2_DataCard.website_like.html",
+    "build:print-html": "python3 export_print_ready_html.py --input AURA_Dataset_v0.2_DataCard.md --output AURA_Dataset_v0.2_DataCard.print.html"
   },
   "keywords": [
     "Card Builder",
@@ -15,6 +17,7 @@
   "author": "Vivian Tsai <vivtsai@google.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "sass": "^1.83.4",
     "ts-loader": "^9.3.1",
     "typescript": "^4.7.4"
   },
