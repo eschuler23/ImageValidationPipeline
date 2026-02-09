@@ -12,8 +12,31 @@ def _scalar_to_int(value) -> int:
     return int(np.asarray(value).item())
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TRAIN_CSV_PATH = os.path.join(BASE_DIR, 'AURA1612BlurrLabled.csv')
-TRAIN_IMAGE_DIR = os.path.join(BASE_DIR, 'AURA1612')
+REPO_ROOT = os.path.abspath(os.path.join(BASE_DIR, os.pardir, os.pardir, os.pardir))
+TRAIN_CSV_PATH = os.path.join(REPO_ROOT, 'ground_truth.csv')
+GROUND_TRUTH_CSV = TRAIN_CSV_PATH
+# Images are now stored under the repo-level Images folder (AURA* subfolder).
+# We match by filename and skip labels that have no local image.
+IMAGES_DIR = os.path.join(REPO_ROOT, 'Images')
+TRAIN_IMAGE_ROOT = os.path.join(IMAGES_DIR, 'AURA1612')
+PROJECT_COLUMN = None
+
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff'}
+SKIP_DIR_NAMES = {'.git', '.venv', '.uv-cache', '.uv_cache', '.cache', '.mplconfig', '__pycache__'}
+SORTED_USABILITY_PNG = os.path.join(
+    REPO_ROOT,
+    'Image_Processing',
+    'Blurr_detection',
+    'review_artifacts',
+    'baseline_variance_sorted_by_class_cap500.png',
+)
+SORTED_USABILITY_PNG_CAP200 = os.path.join(
+    REPO_ROOT,
+    'Image_Processing',
+    'Blurr_detection',
+    'review_artifacts',
+    'baseline_variance_sorted_by_class_cap200.png',
+)
 
 # Laplacian variance threshold.
 # Prediction rule: laplacian_variance < threshold  =>  "blurry"
@@ -21,6 +44,79 @@ TRAIN_IMAGE_DIR = os.path.join(BASE_DIR, 'AURA1612')
 # To get *more* images predicted as blurry (fewer false negatives), INCREASE this value.
 #LAPLACIAN_THRESHOLD = 100.0
 LAPLACIAN_THRESHOLD = 186.895
+
+
+def build_filename_lookup(search_root, *, extensions=IMAGE_EXTENSIONS, skip_dirs=SKIP_DIR_NAMES):
+    """Index images under search_root by filename (case-insensitive)."""
+    lookup = {}
+    duplicates = set()
+
+    if not search_root or not os.path.isdir(search_root):
+        print(f"Warning: image search root not found: {search_root}")
+        return lookup
+
+    for root, dirnames, filenames in os.walk(search_root):
+        dirnames[:] = [d for d in dirnames if not d.startswith('.') and d not in skip_dirs]
+        filenames = [f for f in filenames if os.path.splitext(f)[1].lower() in extensions]
+        filenames.sort()
+        for filename in filenames:
+            key = filename.lower()
+            image_path = os.path.join(root, filename)
+            if key in lookup and lookup[key] != image_path:
+                duplicates.add(filename)
+                continue
+            lookup[key] = image_path
+
+    if duplicates:
+        print(f"Warning: {len(duplicates)} duplicate filenames found; using the first occurrence.")
+
+    print(f"Indexed {len(lookup)} images under: {search_root}")
+    return lookup
+
+
+def _pick_best_aura_dir(csv_path, images_dir):
+    """Pick the AURA* folder with the most filename matches from the CSV."""
+    if not images_dir or not os.path.isdir(images_dir):
+        return None
+
+    try:
+        df = pd.read_csv(csv_path)
+        filenames = [str(v).strip() for v in df.get('filename', []) if str(v).strip()]
+    except Exception:
+        return None
+
+    if not filenames:
+        return None
+
+    candidates = [
+        d for d in os.listdir(images_dir)
+        if d.lower().startswith('aura') and os.path.isdir(os.path.join(images_dir, d))
+    ]
+    if not candidates:
+        return None
+
+    best_dir = None
+    best_count = 0
+    for candidate in candidates:
+        path = os.path.join(images_dir, candidate)
+        try:
+            files = {
+                f for f in os.listdir(path)
+                if os.path.splitext(f)[1].lower() in IMAGE_EXTENSIONS
+            }
+        except Exception:
+            continue
+
+        count = sum(1 for name in filenames if name in files)
+        if count > best_count:
+            best_count = count
+            best_dir = path
+
+    if best_dir and best_count > 0:
+        print(f"Using image folder '{best_dir}' with {best_count} CSV matches.")
+        return best_dir
+
+    return None
 
 
 def load_images_from_dir(image_dir, recursive=True):
@@ -67,7 +163,37 @@ def load_images_from_dir(image_dir, recursive=True):
     }
 
 
-def load_local_dataset(image_dir, csv_path, label_column='Blurr', test_ratio=0.2, random_state=42):
+def resolve_image_path(filename, row, image_root, filename_lookup, project_column=PROJECT_COLUMN):
+    """Resolve an image path by filename (optionally using project column + lookup)."""
+    if not filename:
+        return None
+
+    project = (row.get(project_column) or '').strip() if project_column else ''
+    if project:
+        candidate = os.path.join(image_root, project, filename)
+        if os.path.exists(candidate):
+            return candidate
+
+    direct = os.path.join(image_root, filename)
+    if os.path.exists(direct):
+        return direct
+
+    if filename_lookup:
+        key = os.path.basename(filename).lower()
+        return filename_lookup.get(key)
+
+    return None
+
+
+def load_local_dataset(
+    image_root,
+    csv_path,
+    label_column='Blurr',
+    test_ratio=0.2,
+    random_state=42,
+    filename_lookup=None,
+    project_column=PROJECT_COLUMN,
+):
     """Load images described in csv_path and split them into train/test lists."""
     rng = np.random.default_rng(random_state)
     images = []
@@ -83,12 +209,12 @@ def load_local_dataset(image_dir, csv_path, label_column='Blurr', test_ratio=0.2
             if not filename:
                 continue
 
-            image_path = os.path.join(image_dir, filename)
-            if not os.path.exists(image_path):
+            image_path = resolve_image_path(filename, row, image_root, filename_lookup, project_column)
+            if not image_path or not os.path.exists(image_path):
                 missing_files += 1
                 continue
 
-            image = cv2.imread(image_path)
+            image = cv2.imread(str(image_path))
             if image is None:
                 unreadable_files += 1
                 continue
@@ -142,7 +268,20 @@ def load_local_dataset(image_dir, csv_path, label_column='Blurr', test_ratio=0.2
 
 
 
-train_split, _ = load_local_dataset(TRAIN_IMAGE_DIR, TRAIN_CSV_PATH, test_ratio=0.0)
+if not os.path.isdir(TRAIN_IMAGE_ROOT):
+    fallback_dir = _pick_best_aura_dir(TRAIN_CSV_PATH, IMAGES_DIR)
+    if fallback_dir:
+        TRAIN_IMAGE_ROOT = fallback_dir
+    else:
+        print(f"Warning: default image folder not found: {TRAIN_IMAGE_ROOT}")
+
+filename_lookup = build_filename_lookup(TRAIN_IMAGE_ROOT)
+train_split, _ = load_local_dataset(
+    TRAIN_IMAGE_ROOT,
+    TRAIN_CSV_PATH,
+    test_ratio=0.0,
+    filename_lookup=filename_lookup,
+)
 x_train = train_split['images']
 y_train = train_split['labels']
 train_filenames = train_split['filenames']
@@ -176,7 +315,7 @@ total_images = len(x_train)
 blurry_count = len(blurry_images)
 not_blurry_count = len(not_blurry_images)
 
-print(f"Total training images (AURA1612): {total_images}")
+print(f"Total training images (from CSV): {total_images}")
 print(f"Blurry images: {blurry_count}")
 print(f"Not blurry images: {not_blurry_count}")
 if total_images:
@@ -228,7 +367,19 @@ def plot_images(images, title, num_images=5, *, color_order: str = 'bgr'):
     plt.show()
 
 
-def plot_image_grid(images, titles=None, cols=6, figsize_per_col=3.0, figsize_per_row=3.0, *, color_order: str = 'bgr'):
+def plot_image_grid(
+    images,
+    titles=None,
+    cols=6,
+    figsize_per_col=3.0,
+    figsize_per_row=3.0,
+    *,
+    color_order: str = 'bgr',
+    title_fontsize=8,
+    title_fontweight='normal',
+    output_path=None,
+    show=True,
+):
     """Plot images in a grid with optional titles.
 
     color_order:
@@ -244,7 +395,7 @@ def plot_image_grid(images, titles=None, cols=6, figsize_per_col=3.0, figsize_pe
 
     cols = max(1, int(cols))
     rows = int(np.ceil(len(images) / cols))
-    plt.figure(figsize=(cols * figsize_per_col, rows * figsize_per_row))
+    fig = plt.figure(figsize=(cols * figsize_per_col, rows * figsize_per_row))
 
     for i, image in enumerate(images):
         ax = plt.subplot(rows, cols, i + 1)
@@ -253,10 +404,17 @@ def plot_image_grid(images, titles=None, cols=6, figsize_per_col=3.0, figsize_pe
             ax.imshow(display_img)
         ax.axis('off')
         if titles is not None and i < len(titles):
-            ax.set_title(str(titles[i]), fontsize=8)
+            ax.set_title(str(titles[i]), fontsize=title_fontsize, fontweight=title_fontweight)
 
-    plt.tight_layout()
-    plt.show()
+    fig.tight_layout()
+    if output_path:
+        output_dir = os.path.dirname(output_path)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+        fig.savefig(output_path, dpi=160)
+    if show:
+        plt.show()
+    plt.close(fig)
 
 # Plot blurry images
 if blurry_images:
@@ -267,8 +425,7 @@ if not_blurry_images:
     plot_images(not_blurry_images, 'Not Blurry Images')
 
 
-# Comparing with ground truth labels (AURA1612)
-GROUND_TRUTH_CSV = os.path.join(BASE_DIR, 'AURA1612BlurrBinaryLables.csv')
+# Comparing with ground truth labels (from TRAIN_CSV_PATH)
 # ground truth labels : "usability considering blur" (last column, column 5)
 
 
@@ -700,6 +857,8 @@ def _plot_sorted_scores_by_class(
     class_order=None,
     y_cap_quantile=0.99,
     y_cap_value=None,
+    output_path=None,
+    show_plot=True,
 ):
     """Bar plot: images sorted by score; bars colored by ground-truth class.
 
@@ -801,10 +960,23 @@ def _plot_sorted_scores_by_class(
 
     ax.legend(handles=handles, loc='upper right', fontsize=8)
     plt.tight_layout()
-    plt.show()
+    if output_path:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        fig.savefig(output_path, dpi=160)
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
 
 
-def _plot_sorted_scores_by_usability(analysis_df, *, threshold=None):
+def _plot_sorted_scores_by_usability(
+    analysis_df,
+    *,
+    threshold=None,
+    output_path=None,
+    show_plot=True,
+    y_cap_value=500,
+):
     palette = {
         'focused enough': '#54a24b',
         'too blurry': '#e45756',
@@ -818,7 +990,9 @@ def _plot_sorted_scores_by_usability(analysis_df, *, threshold=None):
         palette=palette,
         class_order=['focused enough', 'too blurry', 'unknown'],
         y_cap_quantile=0.99,
-        y_cap_value=700,
+        y_cap_value=y_cap_value,
+        output_path=output_path,
+        show_plot=show_plot,
     )
 
 
@@ -838,7 +1012,7 @@ def _plot_sorted_scores_by_blurr_type(analysis_df, *, threshold=None):
         palette=palette,
         class_order=['blurry', 'blurry foreground', 'blurry background', 'no blurr', 'unknown'],
         y_cap_quantile=0.99,
-        y_cap_value=1200,
+        y_cap_value=500,
     )
 
 
@@ -871,17 +1045,28 @@ def show_scored_images_sorted(
     color_order: str = 'auto',
     highlight_filenames=None,
     border_layers_by_filename=None,
+    include_filename_in_title=True,
+    score_title_fontsize=8,
+    score_title_fontweight='normal',
+    output_grid_dir=None,
+    only_chunk_index=None,
+    show_grids=True,
 ):
     """Display images sorted by score with a big red score overlay.
 
     - chunks the display to keep figures responsive
     - optionally saves annotated images to save_dir (preserving relative paths)
+    - optionally saves grid figures to output_grid_dir
     """
     if not images_bgr:
         return
 
     cols = max(1, int(cols))
     chunk_size = max(cols, int(chunk_size))
+    if only_chunk_index is not None:
+        only_chunk_index = int(only_chunk_index)
+        if only_chunk_index <= 0:
+            raise ValueError('only_chunk_index must be >= 1 when provided.')
 
     if max_images is not None:
         max_images = int(max_images)
@@ -920,6 +1105,8 @@ def show_scored_images_sorted(
 
     if save_dir:
         os.makedirs(save_dir, exist_ok=True)
+    if output_grid_dir:
+        os.makedirs(output_grid_dir, exist_ok=True)
 
     # Compatibility: in notebooks it’s easy to have an older plot_image_grid() definition
     # loaded that doesn’t accept color_order. We adapt at runtime.
@@ -929,9 +1116,14 @@ def show_scored_images_sorted(
         _plot_grid_params = set(inspect.signature(plot_image_grid).parameters.keys())
         _plot_grid_supports_color_order = 'color_order' in _plot_grid_params
     except Exception:
+        _plot_grid_params = set()
         _plot_grid_supports_color_order = False
 
     for start in range(0, len(items), chunk_size):
+        chunk_index = (start // chunk_size) + 1
+        if only_chunk_index is not None and chunk_index != only_chunk_index:
+            continue
+
         chunk = items[start:start + chunk_size]
         chunk_images = []
         chunk_titles = []
@@ -973,32 +1165,49 @@ def show_scored_images_sorted(
                     cv2.imwrite(out_path, np.asarray(to_write))
 
             chunk_images.append(scored)
-            chunk_titles.append(f"{filename}\n{float(score):.1f}")
+            score_text = f"{float(score):.1f}"
+            if include_filename_in_title:
+                chunk_titles.append(f"{filename}\n{score_text}")
+            else:
+                chunk_titles.append(score_text)
 
         if not chunk_images:
             continue
 
-        if _plot_grid_supports_color_order:
-            plot_image_grid(
-                chunk_images,
-                titles=chunk_titles,
-                cols=cols,
-                figsize_per_col=2.6,
-                figsize_per_row=2.6,
-                color_order=inferred_order,
+        grid_output_path = None
+        if output_grid_dir:
+            grid_output_path = os.path.join(
+                output_grid_dir,
+                f"sorted_laplacian_grid_{chunk_index:02d}.png",
             )
+
+        common_kwargs = {
+            'titles': chunk_titles,
+            'cols': cols,
+            'figsize_per_col': 2.6,
+            'figsize_per_row': 2.6,
+        }
+        if 'title_fontsize' in _plot_grid_params:
+            common_kwargs['title_fontsize'] = score_title_fontsize
+        if 'title_fontweight' in _plot_grid_params:
+            common_kwargs['title_fontweight'] = score_title_fontweight
+        if grid_output_path and 'output_path' in _plot_grid_params:
+            common_kwargs['output_path'] = grid_output_path
+        if 'show' in _plot_grid_params:
+            common_kwargs['show'] = show_grids
+
+        if _plot_grid_supports_color_order:
+            common_kwargs['color_order'] = inferred_order
+            plot_image_grid(chunk_images, **common_kwargs)
         else:
             # Older plot_image_grid assumes BGR input and converts BGR->RGB internally.
             to_plot = chunk_images
             if inferred_order == 'rgb':
                 to_plot = [cv2.cvtColor(img, cv2.COLOR_RGB2BGR) for img in chunk_images]
-            plot_image_grid(
-                to_plot,
-                titles=chunk_titles,
-                cols=cols,
-                figsize_per_col=2.6,
-                figsize_per_row=2.6,
-            )
+            plot_image_grid(to_plot, **common_kwargs)
+
+        if grid_output_path:
+            print(f"Saved sorted Laplacian grid chunk {chunk_index:02d}: {grid_output_path}")
 
 
 if df.empty:
@@ -1083,8 +1292,19 @@ else:
 
     scores = analysis_df['laplacian_variance'].to_numpy(dtype=float)
     _plot_variance_distribution(scores, threshold=LAPLACIAN_THRESHOLD)
-    _plot_sorted_scores_by_usability(analysis_df, threshold=LAPLACIAN_THRESHOLD)
-    _plot_sorted_scores_by_blurr_type(analysis_df, threshold=LAPLACIAN_THRESHOLD)
+    _plot_sorted_scores_by_usability(
+        analysis_df,
+        threshold=None,
+        output_path=SORTED_USABILITY_PNG,
+        y_cap_value=500,
+    )
+    _plot_sorted_scores_by_usability(
+        analysis_df,
+        threshold=None,
+        output_path=SORTED_USABILITY_PNG_CAP200,
+        y_cap_value=200,
+    )
+    _plot_sorted_scores_by_blurr_type(analysis_df, threshold=None)
     _show_border_legend()
 
     sorted_images = []
@@ -1135,6 +1355,20 @@ else:
     # Optional: save annotated images for offline inspection.
     SAVE_SCORED_IMAGES = False
     SCORED_OUTPUT_DIR = os.path.join(BASE_DIR, 'threshold_analysis_scored')
+    GRID_OUTPUT_DIR = os.path.join(REPO_ROOT, 'Image_Processing', 'Blurr_detection', 'review_artifacts', 'sorted_laplacian_grids')
+    GRID_CHUNK_INDEX_RAW = (os.getenv('LAPLACIAN_GRID_CHUNK_INDEX') or '').strip()
+    GRID_SHOW = (os.getenv('LAPLACIAN_GRID_SHOW') or '').strip().lower() in {'1', 'true', 'yes', 'y'}
+
+    GRID_CHUNK_INDEX = None
+    if GRID_CHUNK_INDEX_RAW:
+        try:
+            GRID_CHUNK_INDEX = int(GRID_CHUNK_INDEX_RAW)
+        except ValueError:
+            print(
+                'Warning: LAPLACIAN_GRID_CHUNK_INDEX must be an integer (1-based). '
+                'Rendering all chunks instead.'
+            )
+            GRID_CHUNK_INDEX = None
 
     show_scored_images_sorted(
         sorted_images,
@@ -1146,5 +1380,11 @@ else:
         save_dir=SCORED_OUTPUT_DIR if SAVE_SCORED_IMAGES else None,
         highlight_filenames=blurry_ground_truth,
         border_layers_by_filename=border_layers_by_filename,
+        include_filename_in_title=False,
+        score_title_fontsize=24,
+        score_title_fontweight='bold',
+        output_grid_dir=GRID_OUTPUT_DIR,
+        only_chunk_index=GRID_CHUNK_INDEX,
+        show_grids=GRID_SHOW,
     )
 # %%
