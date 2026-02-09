@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AURA Dataset: Cervical Mucus Images (v0.2)</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm;
+    }
+    :root {
+      --text: #121212;
+      --muted: #404040;
+      --accent: #0f4c5c;
+      --code-bg: #f2f4f7;
+      --rule: #d6dbe1;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: var(--text);
+      background: #ffffff;
+      font-family: "Source Serif 4", "Georgia", "Times New Roman", serif;
+      line-height: 1.45;
+      font-size: 11pt;
+    }
+    main {
+      max-width: 180mm;
+      margin: 0 auto;
+      padding: 0;
+    }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      margin: 0.85em 0 0.35em;
+      color: var(--accent);
+      break-after: avoid-page;
+    }
+    h1 {
+      font-size: 24pt;
+      margin-top: 0;
+      border-bottom: 2px solid var(--rule);
+      padding-bottom: 0.22em;
+    }
+    h2 {
+      font-size: 16pt;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.18em;
+      margin-top: 1.2em;
+    }
+    h3 { font-size: 13pt; }
+    h4 {
+      font-size: 11.5pt;
+      color: var(--muted);
+      margin-top: 0.9em;
+    }
+    p {
+      margin: 0.25em 0 0.6em;
+      text-align: left;
+      orphans: 3;
+      widows: 3;
+    }
+    ul, ol {
+      margin: 0.25em 0 0.7em 1.25em;
+      padding: 0;
+    }
+    li {
+      margin: 0.16em 0;
+    }
+    code {
+      font-family: "SF Mono", "Menlo", "Consolas", monospace;
+      background: var(--code-bg);
+      border-radius: 3px;
+      padding: 0.05em 0.3em;
+      font-size: 0.95em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 0.65em;
+      overflow-x: auto;
+      break-inside: avoid-page;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+<h1>AURA Dataset: Cervical Mucus Images (v0.2)</h1>
+<p>The AURA Dataset is a living, exploratory image dataset built in a bachelor-thesis context to understand real-world cervical mucus uploads and to support image usability filtering. The current documented snapshot is version <code>0.2</code> with an authoritative total of <code>816</code> images based on ground-truth records.</p>
+<h2>Summary</h2>
+<h3>Dataset Identity</h3>
+<h4>Name</h4>
+<p>AURA Dataset: Cervical Mucus Images</p>
+<h4>Acronym</h4>
+<p>AURA (<code>Ausflussueberwachung und regelmaessige Analyse</code>)</p>
+<h4>Version</h4>
+<p><code>v0.2</code> (living dataset, not frozen)</p>
+<h4>Recommended Citation</h4>
+<p>Schueler, Emma (2026). AURA Dataset: Cervical Mucus Images, v0.2 (private research dataset, unpublished).</p>
+<h3>Intended Scope</h3>
+<h4>Primary Intended Use</h4>
+<p>Differentiate images that are usable for further analysis from images that are not usable, with strong focus on blur and setup validity.</p>
+<h4>Explicitly Out of Scope</h4>
+<ul>
+<li>Cycle phase inference.</li>
+<li>Fertility state prediction.</li>
+<li>Diagnosis or clinical decision support.</li>
+</ul>
+<h3>Dataset Size and Sources</h3>
+<h4>Authoritative Total</h4>
+<p><code>816</code> images (ground-truth total).</p>
+<h4>Source Breakdown</h4>
+<ul>
+<li>App volunteers: <code>496</code></li>
+<li>Web: <code>172</code></li>
+<li>Professional-shared client images: <code>132</code></li>
+<li>FemTech company survey images: <code>16</code></li>
+</ul>
+<h2>Authorship and Governance</h2>
+<h3>Responsible Parties</h3>
+<h4>Creator</h4>
+<p>Emma Schueler</p>
+<h4>Affiliation Context</h4>
+<p>Work conducted in a bachelor-thesis context at HTW Berlin; this dataset is not documented as an official institutional release or endorsement.</p>
+<h4>Owner / Data Steward</h4>
+<p>Emma Schueler</p>
+<h4>Contact</h4>
+<p><code>hello@dischargediary.com</code></p>
+<h3>Access and Distribution</h3>
+<h4>Current Access</h4>
+<p>Raw images are locally accessible only to the creator.</p>
+<h4>Public Availability</h4>
+<p>Not public as of February 9, 2026. External sharing and redistribution are currently blocked because consent/legal coverage is incomplete across sources.</p>
+<h2>Collection and Provenance</h2>
+<h3>Collection Window</h3>
+<h4>Active Collection Period</h4>
+<p>December 1, 2025 to February 9, 2026.</p>
+<h4>Timestamp Caveat</h4>
+<p>Some files have timestamps from before December 1, 2025 because users could upload pre-existing images from local device storage.</p>
+<h3>Source-Specific Provenance</h3>
+<h4>App Volunteers</h4>
+<p>Collected through a custom Progressive Web App (PWA). Uploads can be traced to pseudonymous user IDs/tokens, and consent can be matched via email-based workflows.</p>
+<h4>Web</h4>
+<p>Downloaded from publicly accessible internet pages; per-image license metadata is generally incomplete. Public accessibility is not treated as blanket reuse or redistribution permission.</p>
+<h4>Professional-Shared Client Images</h4>
+<p>Shared through a practitioner-mediated process; consent evidence is partly informal and source-level rather than complete, centrally archived per-image legal documentation.</p>
+<h4>FemTech Company Survey Images</h4>
+<p>Provided directly by the company for thesis and model-training use; publication and redistribution rights are not yet documented as granted in this version.</p>
+<h3>Capture Modality</h3>
+<h4>Device and Platform Constraints</h4>
+<p>No device restrictions were enforced. Any user able to access the PWA in a browser could upload images (including iOS and Android devices), from camera capture or existing media.</p>
+<h2>Data Content</h2>
+<h3>Population and Context</h3>
+<h4>App Participant Profile (Reported)</h4>
+<ul>
+<li>Approximate age range: <code>18-55</code></li>
+<li>Geography: primarily Germany</li>
+</ul>
+<h4>Metadata Reliability</h4>
+<p>User-entered metadata (for example cycle details or contraceptive context) is currently treated as unverified; image content is treated as the reliable component.</p>
+<h3>Upload Guidance Given to Users</h3>
+<h4>Instruction Text</h4>
+<ul>
+<li>&quot;Perfect shots I need you to upload: Clear, on toilet paper or fingers.&quot;</li>
+<li>&quot;Bad shots I also need you to upload: Shake the camera, turn off the lights, or take a blurry photo from far away.&quot;</li>
+</ul>
+<h3>File Types and Size</h3>
+<h4>File Formats (Folder Snapshot)</h4>
+<ul>
+<li>jpg: <code>379</code></li>
+<li>jpeg: <code>303</code></li>
+<li>png: <code>112</code></li>
+<li>webp: <code>23</code></li>
+<li>heic: <code>2</code></li>
+<li>svg: <code>1</code></li>
+<li>no extension: <code>3</code></li>
+</ul>
+<h4>File Size Range (Folder Snapshot)</h4>
+<ul>
+<li>Minimum: <code>4,552</code> bytes (~4.45 KB) at <code>Images/Web52/IMG_3906 4.jpg</code></li>
+<li>Maximum: <code>5,940,294</code> bytes (~5.94 MB) at <code>Images/AURA101/5b5144cc-4fc9-4164-8d27-197fd7b6c089.jpg</code></li>
+</ul>
+<h4>Snapshot Caveat</h4>
+<p>Folder snapshots and format counts may not match the authoritative ground-truth total due to later file deletions/moves.</p>
+<h2>Annotation Schema</h2>
+<h3>Annotation Process</h3>
+<h4>Annotators</h4>
+<p>Initial labeling was performed by Emma Schueler; an expert reviewer provided feedback for uncertain cases.</p>
+<h4>Annotation Style</h4>
+<p>Multi-label annotation is used. Label counts represent occurrences and can exceed the number of unique images.</p>
+<h3>Label Sets and Counts</h3>
+<h4>Quality (target set size: 816 images)</h4>
+<ul>
+<li>Usable: <code>551</code></li>
+<li>Too Blurry: <code>136</code></li>
+<li>Wrong Setup: <code>121</code></li>
+<li>Irrelevant: <code>10</code></li>
+</ul>
+<h4>Types (subset size: 385 images)</h4>
+<ul>
+<li>underwear: <code>104</code></li>
+<li>finger: <code>200</code></li>
+<li>tissue: <code>67</code></li>
+<li>other: <code>14</code></li>
+</ul>
+<h4>Blur (target set size: 816 images)</h4>
+<ul>
+<li>no blur: <code>264</code></li>
+<li>blurry: <code>72</code></li>
+<li>blurry background: <code>415</code></li>
+<li>blurry foreground: <code>65</code></li>
+</ul>
+<h4>Usability Considering Blur (target set size: 816 images)</h4>
+<ul>
+<li>focused enough: <code>671</code></li>
+<li>too blurry: <code>145</code></li>
+</ul>
+<h4>Usability Considering NFP (target set size: 816 images)</h4>
+<ul>
+<li>usable: <code>560</code></li>
+<li>not usable: <code>256</code></li>
+<li>unsure: <code>0</code></li>
+</ul>
+<h3>Operational Label Definitions</h3>
+<h4>focused enough vs too blurry</h4>
+<p>The threshold is conservative: only images with almost no blur are labeled <code>focused enough</code>; all others are <code>too blurry</code>.</p>
+<h4>usable vs not usable (NFP usability)</h4>
+<p><code>usable</code>: sufficiently focused, contains cervical mucus, and appears in valid setup (finger or tissue). <code>not usable</code>: invalid setup (for example underwear/other), no visible cervical mucus, or clear off-domain/mistaken upload.</p>
+<h3>Distribution and Overlap Notes</h3>
+<h4>Multi-Label Overlap Example</h4>
+<p>At least <code>2</code> images were explicitly reported with both <code>blurry background</code> and <code>wrong setup</code>.</p>
+<h4>Contributor Concentration</h4>
+<p>For app uploads: <code>30</code> unique contributors were reported; contributor upload range includes a maximum of <code>215</code> images from one contributor.</p>
+<h4>Minimum Contributor Notes</h4>
+<p>Contributors min: <code>1</code>. Registered users min: <code>0</code>.</p>
+<h2>Consent, Rights, and Retention</h2>
+<h3>Consent and Permission by Source</h3>
+<h4>App Volunteers</h4>
+<p>Informed consent was collected with mixed scopes (some thesis-only, some broader research use). Exact counts by scope are pending; reuse decisions must be checked record-by-record.</p>
+<h4>Web</h4>
+<p>Images were publicly accessible at collection time, but licensing/copyright clarity is incomplete and requires source-level verification. No blanket redistribution right is assumed.</p>
+<h4>Professional-Shared Client Images</h4>
+<p>Used within the bachelor-thesis model-training context; future external reuse and publication permissions are not yet finalized.</p>
+<h4>FemTech Company Survey Images</h4>
+<p>Allowed uses documented as thesis and model training. Publication and third-party redistribution are treated as out of scope unless explicitly approved.</p>
+<h3>Withdrawal and Retention</h3>
+<h4>Withdrawal Process</h4>
+<p>App participants can request deletion via the email channel provided in consent documents. No withdrawal requests were used so far.</p>
+<h4>Retention Policy</h4>
+<p>Communicated primary retention deadline is March 31, 2026, unless optional extended consent is granted for longer use related to an open-source dataset objective.</p>
+<h3>Legal and Compliance Context</h3>
+<h4>GDPR Concept</h4>
+<p>A detailed GDPR concept is in place for Aura app collection, centered on transparency and consent.</p>
+<h4>Consent Completeness Status</h4>
+<p>Consent/legal basis is not uniformly complete across all sources, and a complete cross-source per-image permission matrix is not finalized. This blocks public release at this stage.</p>
+<h2>Privacy, Security, and Risk</h2>
+<h3>Privacy Exposure</h3>
+<h4>Potential Identifiers in Images</h4>
+<p>Some images include potentially identifying elements (for example faces, jewelry, and home bathroom backgrounds).</p>
+<h4>EXIF Metadata Status</h4>
+<p>EXIF metadata is currently preserved in stored files (for example potential timestamp/device/GPS fields). Analysis pipelines may use pixels only, but raw file metadata remains and is a privacy risk for any external sharing.</p>
+<h3>Security Controls</h3>
+<h4>Current Controls</h4>
+<ul>
+<li>App access is password-protected.</li>
+<li>Server access requires university VPN plus server authentication.</li>
+<li>Local environments are password-protected.</li>
+<li>Transfer is protected via HTTPS.</li>
+</ul>
+<h4>Planned Controls</h4>
+<p>File-level encryption at rest is planned but not yet implemented.</p>
+<h3>Harm and Misuse</h3>
+<h4>Key Risks</h4>
+<ul>
+<li>Privacy and re-identification harm in a sensitive, stigmatized topic area.</li>
+<li>Non-consensual or over-broad reuse of intimate imagery.</li>
+<li>Harm from misuse for fertility diagnosis or decision support without validated methods.</li>
+</ul>
+<h4>Current Mitigations</h4>
+<ul>
+<li>Data minimization (no unnecessary personal identifiers such as real names in dataset records).</li>
+<li>Separation between account email identity and image records.</li>
+<li>Restricted access and non-public status.</li>
+</ul>
+<h2>Example Images Policy</h2>
+<h3>Inclusion Rules</h3>
+<h4>Whether Examples Are Included</h4>
+<p>Examples may be included in documentation (target: at least one example per category) only under strict consent and privacy controls.</p>
+<h4>Allowed Source for Examples</h4>
+<p>Only app-volunteer images are eligible for examples at this stage.</p>
+<h4>Required Consent for Examples</h4>
+<p>Examples are permitted only when explicit publication consent exists for the specific records.</p>
+<h4>De-identification for Examples</h4>
+<p>No mandatory automated de-identification pipeline is currently implemented. Before publication, manual privacy review is required and redaction/cropping should be applied when identifiable details are present. An optional ROI crop algorithm exists as a potential support step.</p>
+<h2>Known Limitations</h2>
+<h3>Sampling and Distribution</h3>
+<h4>Power-User Imbalance</h4>
+<p>A small subset of users contributes a large share of uploads.</p>
+<h4>Class Imbalance</h4>
+<p>Label/category distributions are strongly imbalanced and not close to 50/50 structures.</p>
+<h3>Collection Bias</h3>
+<h4>Instruction-Induced Bias</h4>
+<p>Users were explicitly asked to submit both high-quality and intentionally poor-quality images, so distribution may not reflect organic upload behavior.</p>
+<h3>Documentation Gaps in v0.2</h3>
+<h4>Currently Undocumented or Skipped Details</h4>
+<ul>
+<li>Formal age-verification process details were not documented in this version.</li>
+<li>Detailed cleanup/removal rule counts were not documented in this version.</li>
+<li>Future release license planning is intentionally out of scope until consent coverage is resolved.</li>
+</ul>
+<h2>Version History</h2>
+<h3>v0.1 to v0.2</h3>
+<h4>v0.1 Baseline (August 2025)</h4>
+<p>Initial exploratory set with <code>161</code> web-sourced images, mostly from educational websites.</p>
+<h4>v0.2 Changes</h4>
+<ul>
+<li>Added collected sources beyond web-only baseline.</li>
+<li>Added expanded annotation schema and label coverage.</li>
+<li>Increased use-case specificity toward usability filtering tasks.</li>
+<li>Some earlier web images became unavailable and could not be re-fetched.</li>
+</ul>
+  </main>
+</body>
+</html>
