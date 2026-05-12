@@ -32,11 +32,11 @@ Run **one model per call** to avoid tool timeouts. Repeat the `main.py` command
 with a different `--models` value for each backbone you want to evaluate.
 
 ## 1) Open the project
-- Open `/Users/raven/Projects/Bachelors` in VSCode or Terminal.
+- Open Projekt destination Folder in VSCode or Terminal.
 
 ## 2) Create / activate the VINV
 ```bash
-cd /Users/raven/Projects/Bachelors
+cd to/ur/folder
 uv venv .venv
 source .venv/bin/activate
 ```
