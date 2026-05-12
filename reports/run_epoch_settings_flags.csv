@@ -1,0 +1,24 @@
+field,category,description
+run,record,Run directory name / run identifier.
+model,record,Model name used for the run (for example resnet50).
+weights,record,Weight source (for example dtd or imagenet).
+epoch,record,Epoch index for this row in the run history.
+val_f1,metric,Validation F1 score for the epoch.
+val_acc,metric,Validation accuracy for the epoch.
+train_loss,metric,Training loss logged for the epoch.
+seed,training_flag,Random seed used for training.
+lr,training_flag,Base learning rate.
+unfreeze_lr,training_flag,Learning rate used after unfreezing layers.
+weight_decay,training_flag,Weight decay regularization factor.
+batch_size,training_flag,Mini-batch size.
+grad_accum_steps,training_flag,Gradient accumulation steps.
+freeze_backbone_epochs,training_flag,Number of epochs with backbone frozen.
+epochs_planned,training_flag,Total planned epochs for the run.
+amp,training_flag,Automatic mixed precision enabled (true/false).
+random_augmentation,data_flag,Random augmentation enabled in preprocessing (true/false).
+csv_path,data_flag,Source ground-truth CSV path used for the run.
+val_base,split_flag,Requested validation base sample count.
+test_base,split_flag,Requested test base sample count.
+val_samples,split_result,Resolved number of validation samples.
+test_samples,split_result,Resolved number of test samples.
+inferred_fields,metadata,Comma-separated fields inferred from run name when missing in config.
