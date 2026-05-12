@@ -1,0 +1,84 @@
+{
+  "csv_path": "ground_truth.csv",
+  "image_dir": null,
+  "image_root": "Images",
+  "project_column": "project",
+  "filename_column": "filename",
+  "label_column": "usability considering nfp",
+  "positive_labels": [
+    "usable"
+  ],
+  "negative_labels": [
+    "not usable"
+  ],
+  "project_map": null,
+  "decode_percent_newlines": true,
+  "dedupe_filenames": true,
+  "random_augmentation": false,
+  "augmentation": {
+    "random_hflip": false,
+    "random_vflip": false,
+    "random_rotations": [],
+    "random_rotation_prob": 0.5,
+    "random_blur": false,
+    "random_blur_prob": 0.3,
+    "random_blur_candidates": [],
+    "random_blur_range": null,
+    "random_blur_reject_radius": 4.0,
+    "blur_keep": [],
+    "blur_flip": [],
+    "blur_only_positive": false,
+    "blur_size_aware": false,
+    "blur_size_small_max_mp": 2.0,
+    "blur_size_medium_max_mp": 10.0,
+    "blur_switch_small": 2.0,
+    "blur_switch_medium": 10.0,
+    "blur_switch_large": 20.0,
+    "crop_jitter": false,
+    "jpeg_quality": null,
+    "jpeg_prob": 0.3,
+    "noise_std": null,
+    "noise_prob": 0.3,
+    "color_jitter": false,
+    "color_jitter_hue": 0.02,
+    "color_jitter_saturation": 0.2,
+    "color_jitter_contrast": 0.1,
+    "brightness_jitter": false,
+    "brightness_jitter_delta": 0.1
+  },
+  "training": {
+    "batch_size": 8,
+    "grad_accum_steps": 1,
+    "epochs": 15,
+    "lr": 0.0001,
+    "unfreeze_lr": 1e-05,
+    "weight_decay": 0.0001,
+    "freeze_backbone_epochs": 5,
+    "unfreeze_last_block": false,
+    "freeze_batchnorm": false,
+    "amp": false
+  },
+  "image_size": 224,
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "splits": {
+    "train_base": 643,
+    "val_base": 121,
+    "test_base": 40
+  },
+  "variants": {
+    "train": 643,
+    "val": 121,
+    "test": 40
+  }
+}

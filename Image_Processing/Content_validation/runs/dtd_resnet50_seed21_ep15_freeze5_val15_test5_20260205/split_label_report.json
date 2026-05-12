@@ -1,0 +1,152 @@
+{
+  "columns": [
+    "usability considering nfp",
+    "Blurr",
+    "Quality",
+    "typs",
+    "usability considering blur"
+  ],
+  "overall": {
+    "usability considering nfp": {
+      "usable": 560,
+      "not usable": 244
+    },
+    "Blurr": {
+      "blurry": 72,
+      "blurry background": 416,
+      "no blurr": 252,
+      "blurry foreground": 64
+    },
+    "Quality": {
+      "usable": 551,
+      "too blurry": 134,
+      "wrong setup": 107,
+      "irrelevant": 10,
+      "too blurry; wrong setup": 2
+    },
+    "typs": {
+      "finger": 200,
+      "<missing>": 431,
+      "underwear": 94,
+      "other": 12,
+      "tissue": 67
+    },
+    "usability considering blur": {
+      "focused enough": 659,
+      "too blurry": 145
+    }
+  },
+  "train": {
+    "usability considering nfp": {
+      "usable": 448,
+      "not usable": 195
+    },
+    "Blurr": {
+      "blurry": 57,
+      "blurry background": 334,
+      "no blurr": 201,
+      "blurry foreground": 51
+    },
+    "Quality": {
+      "usable": 444,
+      "too blurry": 107,
+      "wrong setup": 83,
+      "irrelevant": 8,
+      "too blurry; wrong setup": 1
+    },
+    "typs": {
+      "finger": 159,
+      "<missing>": 346,
+      "underwear": 72,
+      "other": 10,
+      "tissue": 56
+    },
+    "usability considering blur": {
+      "focused enough": 529,
+      "too blurry": 114
+    }
+  },
+  "val": {
+    "usability considering nfp": {
+      "not usable": 37,
+      "usable": 84
+    },
+    "Blurr": {
+      "blurry foreground": 10,
+      "no blurr": 38,
+      "blurry background": 62,
+      "blurry": 11
+    },
+    "Quality": {
+      "too blurry": 21,
+      "usable": 80,
+      "wrong setup": 18,
+      "irrelevant": 1,
+      "too blurry; wrong setup": 1
+    },
+    "typs": {
+      "<missing>": 63,
+      "finger": 32,
+      "underwear": 16,
+      "other": 1,
+      "tissue": 9
+    },
+    "usability considering blur": {
+      "too blurry": 24,
+      "focused enough": 97
+    }
+  },
+  "test": {
+    "usability considering nfp": {
+      "usable": 28,
+      "not usable": 12
+    },
+    "Blurr": {
+      "blurry": 4,
+      "no blurr": 13,
+      "blurry background": 20,
+      "blurry foreground": 3
+    },
+    "Quality": {
+      "usable": 27,
+      "too blurry": 6,
+      "wrong setup": 6,
+      "irrelevant": 1
+    },
+    "typs": {
+      "<missing>": 22,
+      "finger": 9,
+      "tissue": 2,
+      "underwear": 6,
+      "other": 1
+    },
+    "usability considering blur": {
+      "too blurry": 7,
+      "focused enough": 33
+    }
+  },
+  "missing_labels": {
+    "usability considering nfp": {
+      "val": [],
+      "test": []
+    },
+    "Blurr": {
+      "val": [],
+      "test": []
+    },
+    "Quality": {
+      "val": [],
+      "test": [
+        "too blurry; wrong setup"
+      ]
+    },
+    "typs": {
+      "val": [],
+      "test": []
+    },
+    "usability considering blur": {
+      "val": [],
+      "test": []
+    }
+  }
+}

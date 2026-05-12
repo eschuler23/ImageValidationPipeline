@@ -1,0 +1,9 @@
+[
+  {
+    "model": "resnet50",
+    "val_f1": 0.9253304411844502,
+    "test_accuracy": 0.925,
+    "test_f1": 0.9258181818181818,
+    "output_dir": "Image_Processing/Content_validation/runs/dtd_resnet50_seed21_ep15_freeze5_val15_test5_20260205/resnet50"
+  }
+]
