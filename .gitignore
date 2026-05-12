@@ -28,3 +28,11 @@ ENV/
 
 # Notebooks
 *.nbconvert.ipynb
+
+# ML model artifacts and checkpoints
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+checkpoints/
+Image_Processing/Content_validation/runs/**/best_model.*
