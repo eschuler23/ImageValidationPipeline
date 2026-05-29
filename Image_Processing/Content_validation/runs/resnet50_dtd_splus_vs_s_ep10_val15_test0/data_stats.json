@@ -1,0 +1,26 @@
+{
+  "rows": 435,
+  "matched": 435,
+  "missing_label": 0,
+  "missing_filename": 0,
+  "missing_project": 0,
+  "unknown_label": 0,
+  "missing_file": 0,
+  "duplicate_filename": 0,
+  "decoded_percent_newlines": 0,
+  "ground_truth_rows": 435,
+  "ground_truth_missing_project": 0,
+  "ground_truth_missing_filename": 0,
+  "ground_truth_missing_label": 0,
+  "ground_truth_decoded_percent_newlines": 0,
+  "samples": 435,
+  "train_samples": 370,
+  "val_samples": 65,
+  "test_samples": 0,
+  "train_variants": 370,
+  "val_variants": 65,
+  "test_variants": 0,
+  "train_augmentation_counts": {
+    "none": 370
+  }
+}

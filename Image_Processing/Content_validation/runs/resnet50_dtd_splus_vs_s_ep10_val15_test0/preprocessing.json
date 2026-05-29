@@ -1,0 +1,89 @@
+{
+  "csv_path": "Image_Processing/Content_validation/fertility_s_splus_manifest.csv",
+  "image_dir": null,
+  "image_root": "/Users/raven/HTW/BachelorPraktikum/Bachelor/data/Images",
+  "project_column": "project",
+  "filename_column": "filename",
+  "label_column": "Zervixschleim Quali\u00e4t",
+  "positive_labels": [
+    "s+"
+  ],
+  "negative_labels": [
+    "s"
+  ],
+  "project_map": null,
+  "decode_percent_newlines": false,
+  "dedupe_filenames": true,
+  "random_augmentation": true,
+  "augmentation": {
+    "random_hflip": true,
+    "random_vflip": false,
+    "random_rotations": [],
+    "random_rotation_prob": 0.5,
+    "random_blur": false,
+    "random_blur_prob": 0.3,
+    "random_blur_candidates": [],
+    "random_blur_range": null,
+    "random_blur_reject_radius": 4.0,
+    "blur_keep": [],
+    "blur_flip": [],
+    "blur_only_positive": false,
+    "blur_size_aware": false,
+    "blur_size_small_max_mp": 2.0,
+    "blur_size_medium_max_mp": 10.0,
+    "blur_switch_small": 2.0,
+    "blur_switch_medium": 10.0,
+    "blur_switch_large": 20.0,
+    "balance_train_target": null,
+    "balance_train_seed": 42,
+    "crop_jitter": false,
+    "jpeg_quality": [
+      60,
+      95
+    ],
+    "jpeg_prob": 0.3,
+    "noise_std": 0.02,
+    "noise_prob": 0.3,
+    "color_jitter": false,
+    "color_jitter_hue": 0.02,
+    "color_jitter_saturation": 0.2,
+    "color_jitter_contrast": 0.1,
+    "brightness_jitter": false,
+    "brightness_jitter_delta": 0.1
+  },
+  "training": {
+    "batch_size": 8,
+    "grad_accum_steps": 1,
+    "epochs": 10,
+    "lr": 0.0001,
+    "unfreeze_lr": 1e-05,
+    "weight_decay": 0.0001,
+    "freeze_backbone_epochs": 1,
+    "unfreeze_last_block": false,
+    "freeze_batchnorm": false,
+    "amp": false
+  },
+  "image_size": 224,
+  "normalization": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "splits": {
+    "train_base": 370,
+    "val_base": 65,
+    "test_base": 0
+  },
+  "variants": {
+    "train": 370,
+    "val": 65,
+    "test": 0
+  }
+}

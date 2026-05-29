@@ -1,0 +1,9 @@
+[
+  {
+    "model": "resnet50",
+    "val_f1": 0.9092744135297328,
+    "test_accuracy": 0.0,
+    "test_f1": 0.0,
+    "output_dir": "Image_Processing/Content_validation/runs/resnet50_dtd_splus_vs_s_ep10_val15_test0/resnet50"
+  }
+]

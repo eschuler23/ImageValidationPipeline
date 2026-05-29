@@ -169,11 +169,11 @@ def stratified_split_samples(
         val_count = int(round(total * val_split))
 
         if total >= 3:
-            if test_count == 0:
+            if test_split > 0 and test_count == 0:
                 test_count = 1
-            if val_count == 0:
+            if val_split > 0 and val_count == 0:
                 val_count = 1
-        elif total == 2 and val_count == 0 and test_count == 0:
+        elif total == 2 and val_split > 0 and val_count == 0 and test_count == 0:
             val_count = 1
 
         while test_count + val_count >= total and (test_count > 0 or val_count > 0):

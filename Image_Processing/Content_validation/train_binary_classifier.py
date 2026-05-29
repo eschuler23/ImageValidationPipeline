@@ -44,6 +44,7 @@ Optional DTD init (requires a local checkpoint):
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import io
 import json
@@ -57,6 +58,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TypedDict
 
 import torch
+import eval_script
 from PIL import Image, ImageFilter
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
@@ -476,11 +478,11 @@ def split_indices_stratified(
         val_count = int(round(total * val_split))
 
         if total >= 3:
-            if test_count == 0:
+            if test_split > 0 and test_count == 0:
                 test_count = 1
-            if val_count == 0:
+            if val_split > 0 and val_count == 0:
                 val_count = 1
-        elif total == 2 and val_count == 0 and test_count == 0:
+        elif total == 2 and val_split > 0 and val_count == 0 and test_count == 0:
             val_count = 1
 
         while test_count + val_count >= total and (test_count > 0 or val_count > 0):
@@ -926,9 +928,10 @@ def save_validation_predictions(
     probs: Sequence[float],
     meta: Sequence[Dict[str, str]],
     label_texts: Dict[int, str],
+    filename: str = "val_predictions.csv",
 ) -> Tuple[Path, List[Dict[str, str]]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / "val_predictions.csv"
+    output_path = output_dir / filename
     rows: List[Dict[str, str]] = []
 
     for pred, label, prob, row_meta in zip(preds, labels, probs, meta):
@@ -1167,7 +1170,7 @@ def train_one_model(
     )
 
     train_dataset = CsvImageDataset(train_variants, train_transform, random_blur=random_blur)
-    val_dataset = CsvImageDataset(val_variants, eval_transform, return_meta=args.save_val_grid)
+    val_dataset = CsvImageDataset(val_variants, eval_transform, return_meta=True)
     test_dataset = CsvImageDataset(test_variants, eval_transform)
 
     train_loader = DataLoader(
@@ -1309,7 +1312,7 @@ def train_one_model(
         if val_metrics["f1"] > best_val_f1:
             best_val_f1 = val_metrics["f1"]
             best_state = {
-                "model_state": model.state_dict(),
+                "model_state": copy.deepcopy(model.state_dict()),
                 "epoch": epoch,
                 "val_f1": best_val_f1,
             }
@@ -1321,32 +1324,79 @@ def train_one_model(
         )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    if best_state:
-        torch.save(best_state, output_dir / "best_model.pt")
+    final_state = {
+        "model_state": copy.deepcopy(model.state_dict()),
+        "epoch": args.epochs,
+    }
+    torch.save(final_state, output_dir / "final_model.pt")
+
+    final_preds, final_labels, final_probs, final_meta = collect_predictions_with_meta(
+        model, val_loader, device
+    )
+    _, final_records = save_validation_predictions(
+        output_dir=output_dir,
+        preds=final_preds,
+        labels=final_labels,
+        probs=final_probs,
+        meta=final_meta,
+        label_texts=label_texts,
+        filename="final_val_predictions.csv",
+    )
 
     if best_state:
+        torch.save(best_state, output_dir / "best_model.pt")
         model.load_state_dict(best_state["model_state"])
 
     test_metrics = evaluate(model, test_loader, device)
 
-    val_predictions_path: Optional[Path] = None
+    best_preds, best_labels, best_probs, best_meta = collect_predictions_with_meta(
+        model, val_loader, device
+    )
+    val_predictions_path, best_records = save_validation_predictions(
+        output_dir=output_dir,
+        preds=best_preds,
+        labels=best_labels,
+        probs=best_probs,
+        meta=best_meta,
+        label_texts=label_texts,
+    )
+
     val_grid_paths: List[Path] = []
     if args.save_val_grid:
-        preds, labels, probs, meta = collect_predictions_with_meta(model, val_loader, device)
-        val_predictions_path, records = save_validation_predictions(
-            output_dir=output_dir,
-            preds=preds,
-            labels=labels,
-            probs=probs,
-            meta=meta,
-            label_texts=label_texts,
-        )
         val_grid_paths = save_validation_grids(
             output_dir=output_dir,
-            records=records,
+            records=best_records,
             grid_cols=args.val_grid_cols,
             max_images_per_grid=args.val_grid_max_images,
         )
+
+    config_payload = {
+        "model": model_name,
+        "weights": args.weights,
+        "device": str(device),
+        "csv_path": str(args.csv_path),
+        "image_root": str(args.image_root) if args.image_root else None,
+        "image_dir": str(args.image_dir) if args.image_dir else None,
+        "label_column": args.label_column,
+        "positive_labels": args.positive_labels,
+        "negative_labels": args.negative_labels,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
+        "lr": args.lr,
+        "val_split": args.val_split,
+        "test_split": args.test_split,
+        "split_strategy": args.split_strategy,
+        "augment": args.augment,
+    }
+    eval_payload = eval_script.write_eval_report(
+        output_dir=output_dir,
+        config=config_payload,
+        labels=[label_texts[0], label_texts[1]],
+        positive_label=label_texts[1],
+        best_epoch=best_state["epoch"] if best_state else None,
+        best_records=best_records,
+        final_records=final_records,
+    )
 
     metrics_payload = {
         "model": model_name,
@@ -1359,6 +1409,10 @@ def train_one_model(
         "test_metrics": test_metrics,
         "val_predictions_csv": str(val_predictions_path) if val_predictions_path else None,
         "val_grids": [str(path) for path in val_grid_paths],
+        "eval_report": str(output_dir / "eval_report.md"),
+        "eval_report_json": str(output_dir / "eval_report.json"),
+        "best_epoch": best_state["epoch"] if best_state else None,
+        "final_val_metrics": eval_payload["final"]["metrics"],
     }
 
     with (output_dir / "metrics.json").open("w", encoding="utf-8") as handle:
